@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <!--Adding Button  "Print Positioning Report PDF" and "Print Positioning Report XLS" in Product Variant Form View-->
+    <record id="product_form_view_procurement_button_extend_x" model="ir.ui.view">
+        <field name="name">product.form.view.procurement.buttons.extend</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="stock.product_form_view_procurement_button"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button string="Positioning Report PDF" name="print_stock_positioning_pdf" type="object" class="oe_highlight"/>
+                <button string="Positioning Report Excel" name="print_stock_positioning_xls" type="object" class="oe_highlight"/>
+            </header>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" name="open_stock_positioning" type="object" icon="fa-building-o" string="Stock Positioning"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!--Wizard view for Excel Report-->
+    <record id="view_stock_positioning_report_form" model="ir.ui.view">
+        <field name="name">stock.positioning.report.form</field>
+        <field name="model">stock.positioning.report</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <b>
+                        <h4>Click on the report file name to download the Excel file.</h4>
+                    </b>
+                    <br/>
+                </group>
+                <group>
+                    <field name="excel_file" readonly="1" filename="file_name"/>
+                    <field name="file_name" invisible="1"/>
+                </group>
+                <footer>
+                    <button string="Close" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!--Report Declaration-->
+    <report
+            id="stock_positioning_variant_report_id_x"
+            string="Stock Positioning Product Variant Report"
+            model="product.product"
+            report_type="qweb-pdf"
+            file="stock_position_by_location.report_stock_position_variant_x"
+            name="stock_position_by_location.report_stock_position_variant_x"
+            menu="False"
+    />
+    
+    <!--Report Design--> 
+    <template id="report_stock_position_variant_document_x">
+        <t t-call="web.html_container">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o"/>
+            <div class="page">
+            	<div class="oe_structure"/>
+            	<center><h2>Stock Positioning Report</h2></center>
+                <h3><b><t t-esc="o.name_get()[0][1]"/></b></h3>
+                <left><b>Date : </b><span t-esc="o.get_date_x()"/></left>
+                <br/><br/>
+
+                <table class="table table-condensed">
+                    <thead>
+						<tr>
+    						<th width="40%">Location</th>
+							<th width="15%">On Hand QTY</th>
+							<th width="15%">Incoming QTY</th>
+							<th width="15%">Outgoing QTY</th>
+							<th width="15%">Forecast QTY</th>
+						</tr>
+					</thead>
+                    <tbody class="sale_tbody">
+                        <tr t-foreach="o.stock_positioning_x" t-as="line">
+                            <td width="40%">
+                                <p class="text-left" t-esc="line.location_id.name_get()[0][1]"/>
+                            </td>
+                            <td width="15%">
+                                <p class="text-center" t-field="line.qty_available"/>
+                            </td>
+                            <td width="15%">
+                                <p class="text-center" t-field="line.incoming_qty"/>
+                            </td>
+                            <td width="15%">
+                                <p class="text-center" t-field="line.outgoing_qty"/>
+                            </td>
+                            <td width="15%">
+                                <p class="text-center" t-field="line.virtual_available"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <t t-foreach="o.get_total_qty_x()" t-as="result">
+                    <table class="table table-condensed">
+                        <tr>
+                            <td width="40%">
+                                <strong>
+                                    <p class="text-right">Total Qty</p>
+                                </strong>
+                            </td>
+                            <td width="15%">
+                                <strong>
+                                    <p class="text-center" t-esc="result['total_qty_available']"/>
+                                </strong>
+                            </td>
+                            <td width="15%">
+                                <strong>
+                                    <p class="text-center" t-esc="result['total_incoming_qty']"/>
+                                </strong>
+                            </td>
+                            <td width="15%">
+                                <strong>
+                                    <p class="text-center" t-esc="result['total_outgoing_qty']"/>
+                                </strong>
+                            </td>
+                            <td width="15%">
+                                <strong>
+                                    <p class="text-center" t-esc="result['total_virtual_available']"/>
+                                </strong>
+                            </td>
+                        </tr>
+                    </table>
+                </t>
+
+            </div>
+        </t>
+        </t>
+    </template>
+
+    <template id="report_stock_position_variant_x">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="stock_position_by_location.report_stock_position_variant_document_x"/>
+            </t>
+        </t>
+    </template>
+
+</odoo>

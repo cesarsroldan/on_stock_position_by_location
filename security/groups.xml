@@ -1,0 +1,10 @@
+<odoo>
+
+
+    <record id="group_stock_by_location_in_crm" model="res.groups">
+        <field name="name">Inventarios por Ubicacion en CRM</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+
+</odoo>

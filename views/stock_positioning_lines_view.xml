@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <!--Hidden View in Variant-->
+    <record id="product_product_normal_form_view_extend_for_button" model="ir.ui.view">
+        <field name="name">view.product.variant.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[1]" position="inside">
+                <field name="stock_positioning_x" nolabel="1" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--Stock Positioning Form View-->
+    <record model="ir.ui.view" id="stock_positioning_x_view_form">
+        <field name="name">stock.positioning.x.form</field>
+        <field name="model">stock.positioning.x</field>
+        <field name="arch" type="xml">
+            <form string="Reporte de Inventario" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_variant_id"/>
+                            <field name="location_id"/>
+                            <field name="qty_available"/>
+                            <field name="incoming_qty"/>
+                            <field name="outgoing_qty"/>
+                            <field name="virtual_available"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--Stock Positioning Tree View-->
+    <record model="ir.ui.view" id="stock_positioning_x_view_tree">
+        <field name="name">stock.positioning.x.tree</field>
+        <field name="model">stock.positioning.x</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Reporte de Inventario" create="false" edit="false" delete="false">
+                <field name="product_variant_id"/>
+                <field name="location_id"/>
+                <field name="qty_available" sum="qty_available"/>
+                <field name="incoming_qty" sum="incoming_qty"/>
+                <field name="outgoing_qty" sum="outgoing_qty"/>
+                <field name="virtual_available" sum="virtual_available"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.server" id="action_stock_by_location"> <!-- Menu + python -->
+        <field name="name">Reporte de Inventario</field>
+        <field name="model_id" ref="stock_position_by_location.model_stock_positioning_x"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.with_context(
+                search_default_group_by_location=1,
+                search_default_group_by_product=1,
+            ).action_product_stock_by_location()
+        </field>
+    </record>
+    
+           <record id="view_stock_by_location_filter" model="ir.ui.view">
+            <field name="name">stock.positioning.x.tree.search</field>
+            <field name="model">stock.positioning.x</field>
+            <field name="arch" type="xml">
+                <search string="Busqueda Reporte de Inventario">
+                    <field name="product_variant_id" operator="child_of"/>
+                    <field name="location_id"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Producto" name="group_by_product" domain="[]" context="{'group_by': 'product_variant_id'}"/>
+                        <filter string="Ubicacion" name="group_by_location" domain="[]" context="{'group_by': 'location_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+    
+    <menuitem id="submenu_stock_report_in_stock" name="Reporte de Inventario para Ventas" parent="stock.menu_warehouse_report" sequence="100" action="action_stock_by_location" groups="group_stock_by_location_in_crm"/>
+    <menuitem id="submenu_stock_by_location_report_in_crm" name="Reporte de Inventario para Ventas" parent="crm.crm_menu_report" sequence="100" action="action_stock_by_location" groups="group_stock_by_location_in_crm"/>
+</odoo>
